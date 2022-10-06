@@ -1,7 +1,7 @@
 openapi: 3.0.2
 info:
   title: Vonage Verify API (v2)
-  version: 0.0.14
+  version: 0.0.15
   description: Verify API provides a choice of routes for sending a code to a user. You can use this to confirm a user's contact information, as a second factor when authenticating users, or for step-up authentication.
   contact:
     name: Vonage DevRel
@@ -15,6 +15,8 @@ security:
 tags:
   - name: Requests
     description: Verify Requests
+  - name: Templates
+    description: Endpoints for creating and modifying Verify Templates.
 
 paths:
   /:
@@ -117,33 +119,108 @@ paths:
               schema:
                 $ref: "#/components/schemas/ErrorThrottled"
 
-    # delete:
-    #   operationId: CancelRequest
-    #   summary: Cancel an in-progress verify request
-    #   description: >-
-    #     <p style="font-weight:bold; color: red;">To be implemented.</p>
-    #     Stops any events yet to occur in a verify request workflow, and ends the request.
-    #   responses:
-    #     "204":
-    #       description: No content
-    #     "404":
-    #       description: "No such request"
-    #       content:
-    #         application/json:
-    #           schema:
-    #             $ref: "#/components/schemas/ErrorInvalidRequest"
-    #     "409":
-    #       description: "Expired request"
-    #       content:
-    #         application/json:
-    #           schema:
-    #             $ref: "#/components/schemas/ErrorExpiredRequest"
-    #     "429":
-    #       description: "Rate Limited"
-    #       content:
-    #         application/json:
-    #           schema:
-    #             $ref: "#/components/schemas/ErrorThrottled"
+  /templates:
+    get:
+      operationId: listTemplates
+      summary: List all existing templates.
+      tags:
+        - Templates
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListTemplatesResponse"
+    post:
+      operationId: createTemplate
+      summary: Create a new template
+      tags:
+        - Templates
+      requestBody:
+        $ref: '#/components/requestBodies/GetTemplateRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListTemplatesResponse"
+
+  /templates/:template_id:
+    get:
+      operationId: getTemplate
+      summary: Get an existing template by ID
+      tags:
+        - Templates
+      parameters:
+        - $ref: "#/components/parameters/template_id"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListTemplatesResponse"
+    delete:
+      operationId: deleteTemplate
+      summary: Delete a template
+      tags:
+        - Templates
+      parameters:
+         - $ref: "#/components/parameters/template_id"
+      responses:
+        "202":
+          description: No Content
+
+  /templates/:template_uuid/channel:
+    post:
+      operationId: createChannel
+      summary: Create a new Channel on a template
+      tags:
+        - Templates
+      parameters:
+        - $ref: "#/components/parameters/template_id"
+      requestBody:
+        $ref: '#/components/requestBodies/CreateChannelRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListTemplatesResponse"
+
+  /templates/:template_uuid/:channel:
+    delete:
+      operationId: deleteChannel
+      summary: Delete a channel on a template
+      tags:
+        - Templates
+      parameters:
+        - $ref: "#/components/parameters/template_id"
+        - $ref: "#/components/parameters/channel"
+      responses:
+        "202":
+          description: No content
+
+  /templates/:template_uuid/channels/:channel/:locale:
+    post:
+      operationId: updateLocale
+      summary: Update the locale information on a channel
+      tags:
+        - Templates
+      parameters:
+        - $ref: "#/components/parameters/template_id"
+        - $ref: "#/components/parameters/channel"
+        - $ref: "#/components/parameters/locale"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListTemplatesResponse"
 
 x-webhooks:
   request-status-update:
@@ -187,6 +264,34 @@ components:
               code:
                 $ref: '#/components/schemas/code'
 
+    GetTemplateRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - name
+            properties:
+              name:
+                description: Reference name for template.
+                example: 'Template1'
+
+    CreateChannelRequest:
+      required: true
+      content:
+        application/json:
+          schema:
+            type: object
+            required:
+              - channel
+            properties:
+              channel:
+                description: Name of channel to add.
+                enum:
+                  - sms
+                example: 'sms'
+
     NewVerificationRequest:
       required: true
       content: 
@@ -203,6 +308,30 @@ components:
             #     allOf:
             #       - $ref: '#/components/schemas/NewPSD2Request'
   parameters:
+    template_id:
+      name: template_uuid
+      required: true
+      in: path
+      description: The template UUID
+      schema:
+        type: string
+      example: 22f571c1-f41a-4db2-bba7-f23a069200c1
+    channel:
+      name: channel
+      required: true
+      in: path
+      description: The channel name
+      schema:
+        type: string
+      example: sms
+    locale:
+      name: locale
+      required: true
+      in: path
+      description: The channel name
+      schema:
+        type: string
+      example: sms
     request_id:
       name: request_id
       in: path
@@ -717,6 +846,34 @@ components:
           example: "xxx"
           description: The instance ID
 
+    ListTemplatesResponse:
+          type: object
+          properties:
+            template_uuid:
+              type: string
+            name:
+              type: string
+            channels:
+              type: object
+              example: {
+                "template_uuid": "8f35a1a7-eb2f-4552-8fdf-fffdaee41bc9",
+                "name": "Template1",
+                "channels": {
+                  "sms": {
+                    "en_GB": {
+                      "status": "approved",
+                      "template": "The authentication code for your ${brand} is: ${code}",
+                      "date_created": "2021-08-30T20:12:15.17865735Z"
+                    },
+                    "fr_FR": {
+                      "status": "pending",
+                      "template": "The authentication code for your ${brand} is: ${code}",
+                      "date_created": "2021-08-30T20:12:15.17865735Z"
+                    }
+                  }
+                }
+              }
+
     ErrorConflictRequest:
       type: object
       properties:
@@ -798,7 +955,6 @@ components:
           type: string
           description: Internal Trace ID
           example: bf0ca0bf927b3b52e3cb03217e1a1ddf
-
 
   securitySchemes:
     basicAuth:
