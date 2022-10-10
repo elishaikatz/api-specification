@@ -162,6 +162,23 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ListTemplatesResponse"
+    patch:
+      operationId: updateTemplate
+      summary: Update a template
+      tags:
+        - Templates
+      parameters:
+        - $ref: "#/components/parameters/template_id"
+      requestBody:
+        $ref: '#/components/requestBodies/GetTemplateRequest'
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ListTemplatesResponse"
+
     delete:
       operationId: deleteTemplate
       summary: Delete a template
@@ -221,6 +238,20 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/ListTemplatesResponse"
+
+  /verify/v2/templates/:template_uuid/channels/:channel/:locale:
+    delete:
+      operationId: deleteLocale
+      summary: Delete a lcoale on a channel
+      tags:
+        - Templates
+      parameters:
+        - $ref: "#/components/parameters/template_id"
+        - $ref: "#/components/parameters/channel"
+        - $ref: "#/components/parameters/locale"
+      responses:
+        "202":
+          description: No content
 
 x-webhooks:
   request-status-update:
@@ -328,7 +359,7 @@ components:
       name: locale
       required: true
       in: path
-      description: The channel name
+      description: The locale code
       schema:
         type: string
       example: sms
