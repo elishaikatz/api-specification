@@ -242,7 +242,7 @@ paths:
   /verify/v2/templates/:template_uuid/channels/:channel/:locale:
     delete:
       operationId: deleteLocale
-      summary: Delete a lcoale on a channel
+      summary: Delete a locale on a channel
       tags:
         - Templates
       parameters:
