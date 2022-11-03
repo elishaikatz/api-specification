@@ -3,18 +3,17 @@ info:
   title: Vonage Bulk API
   description: REST APIs to create and orchestrate bulk communication campaigns using Vonage APIs and Applications.
   version: 0.1.0
+  #  todo devrel: check contact details for vonage links
   contact:
-    name: Nexmo.com
-    email: devrel@nexmo.com
-    url: "https://developer.nexmo.com/"
-    x-twitter: Nexmo
+    name: Vonage.com
+    email: devrel@vonage.com
+    url: "https://developer.vonage.com/"
+    x-twitter: Vonage
   termsOfService: "https://www.nexmo.com/terms-of-use"
+  #  todo devrel: are we MIT licence?
   license:
     name: The MIT License (MIT)
     url: "https://opensource.org/licenses/MIT"
-  x-logo:
-    url: "https://twitter.com/Nexmo/profile_image?size=original"
-  x-apiClientRegistration: "https://dashboard.nexmo.com/sign-up"
   x-label: Alpha
 tags:
   - name: lists
@@ -27,6 +26,7 @@ tags:
     description: API to create a campaign ("Job") utilising a list, a set of actions and events
   - name: runs
     description: APIs relating to working with runs
+  # todo devrel: need better description for events and webhooks tags
   - name: events
     description: APIs relating to working with events
   - name: webhooks
@@ -35,7 +35,7 @@ servers:
   - url: https://api-eu.vonage.com/v0.1/bulk
     description: prod env in EU geo
 security:
-  - bearerAuth: []
+  - bearerAuth: [ ]
 paths:
   /lists:
     get:
@@ -57,7 +57,7 @@ paths:
     post:
       operationId: listsCreate
       summary: Create list
-      parameters: []
+      parameters: [ ]
       requestBody:
         $ref: "#/components/requestBodies/ListRequest"
       responses:
@@ -127,7 +127,7 @@ paths:
       operationId: listsClear
       summary: Clear list by deleting all items
       responses:
-        #        todo: modify response code to 202
+        # todo: modify response code to 202
         "202":
           $ref: "#/components/responses/AcceptedResponse"
         "401":
@@ -143,7 +143,7 @@ paths:
       operationId: listsFetch
       summary: Fetch and replace all items from datasource
       responses:
-        #        todo: modify response code to 202
+        # todo: modify response code to 202
         "202":
           $ref: "#/components/responses/AcceptedResponse"
         "400":
@@ -553,35 +553,32 @@ paths:
           $ref: "common/common_errors.yml#/components/responses/NotFoundError"
       tags:
         - runs
-  # todo: revised webhook endpoints - can we have a single endpoint we could customize?
   /webhooks/actions/status:
     post:
       operationId: webhooksActionStatus
       summary: Webhook endpoint to handle action call status for async actions
       responses:
-        #  todo: change code to response 204
-        "204":
-          $ref: "#/components/responses/NoContentResponse"
+        "200":
+          $ref: "#/components/responses/OKWithNoContentResponse"
         "400":
           $ref: "#/components/responses/ErrorBadRequest"
       tags:
         - webhooks
       security:
-        - {}
+        - { }
   /webhooks/recipients/responses:
     post:
       operationId: webhooksRecipientResponse
       summary: Webhook endpoint to handle recipient responses
       responses:
-        #  todo: change code to response 204
-        "204":
-          $ref: "#/components/responses/NoContentResponse"
+        "200":
+          $ref: "#/components/responses/OKWithNoContentResponse"
         "400":
           $ref: "#/components/responses/ErrorBadRequest"
       tags:
         - webhooks
       security:
-        - {}
+        - { }
 
 components:
   securitySchemes:
@@ -624,7 +621,6 @@ components:
         $ref: "#/components/schemas/JobId"
 
     RunId:
-      # todo: change job_run_id to run_id
       name: run_id
       in: path
       description: Unique identifier for a run
@@ -692,7 +688,6 @@ components:
 
   responses:
     AcceptedResponse:
-      # todo: what should we return in accepted response? It currently return no content (then why not use http code 204?). I added application/json to avoid the doc warning.
       description: Request accepted and is processed asynchronously on the server
       content:
         application/json:
@@ -700,8 +695,14 @@ components:
             type: string
             example: ""
 
-    NoContentResponse:
-      description: No content response
+    OKWithNoContentResponse:
+      # note: future: change code to response 204 or need to define action to set the appropriate response code and payload
+      description: Webhook succeed - no content response
+      content:
+        application/json:
+          schema:
+            type: string
+            example: ""
 
     ErrorBadRequest:
       description: Invalid request parameter or body
@@ -781,7 +782,7 @@ components:
                       href: https://api-eu.vonage.com/v0.1/bulk/lists?page_size=100&page=1
                   _embedded:
                     lists:
-                      # todo - can we reuse examples? Based on doc and tickets no
+                      # todo devrel: can we reuse examples? Based on doc and tickets no
                       # - $ref: "#/components/examples/ListManualResponse/value"
                       - name: Recipients for demo
                         description: List of recipients for demo
@@ -827,7 +828,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ItemDto"
+            $ref: "#/components/schemas/ListItemDto"
           examples:
             simple:
               $ref: "#/components/examples/ItemsResponseExample"
@@ -849,7 +850,7 @@ components:
                         type: array
                         readOnly: true
                         items:
-                          $ref: "#/components/schemas/ItemDto"
+                          $ref: "#/components/schemas/ListItemDto"
                 example:
                   total_items: 2
                   page: 1
@@ -1147,7 +1148,6 @@ components:
                         type: array
                         readOnly: true
                         items:
-                          #                          todo: change item to RunDto and not action dto
                           $ref: "#/components/schemas/RunDto"
                 example:
                   total_items: 1
@@ -1180,7 +1180,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/RunSummary"
+            $ref: "#/components/schemas/RunSummaryDto"
 
     EventsPagedResponse:
       description: Events paged response
@@ -1230,13 +1230,13 @@ components:
                         action_id: 26c5bbe2-113e-4201-bd93-f69e0a03d17f
                         data:
                           url: https://postman-echo.com/post
-                          args: {}
+                          args: { }
                           data:
                             from: ""
-                          form: {}
+                          form: { }
                           json:
                             from: ""
-                          files: {}
+                          files: { }
                           headers:
                             host: postman-echo.com
                             user-agent: got (https://github.com/sindresorhus/got)
@@ -1276,44 +1276,21 @@ components:
       properties:
         first:
           $ref: "#/components/schemas/Href"
-        prev:
-          $ref: "#/components/schemas/Href"
         self:
+          $ref: "#/components/schemas/Href"
+        prev:
           $ref: "#/components/schemas/Href"
         next:
           $ref: "#/components/schemas/Href"
-        # todo: add last to implementation
-        last:
-          $ref: "#/components/schemas/Href"
       required:
-        # todo: fix links required in code - it make no sense to have next or prev if none available
         - first
         - self
-        - last
 
     PageResponseDto:
       allOf:
-        # todo: use PagedResponse - if we do it currently break the examples
-        #  $ref: "common/hal_structures.yml#/components/schemas/PagedResponse"
+        - $ref: "common/hal_structures.yml#/components/schemas/PagedResponse"
         - type: object
           properties:
-            total_items:
-              type: number
-              readOnly: true
-              example: 10000
-            total_pages:
-              type: number
-              readOnly: true
-              example: 50
-            page:
-              type: number
-              readOnly: true
-              minimum: 1
-              example: 1
-            page_size:
-              type: number
-              readOnly: true
-              example: 250
             _links:
               $ref: "#/components/schemas/HalLinks"
             _embedded:
@@ -1365,7 +1342,6 @@ components:
                     - "name must be longer than or equal to 1 characters"
                     - "name must be a string"
 
-    # todo: rename from ApiChangedDto
     ApiDataAffected:
       description: Count of affected data records as a result of the API action
       type: object
@@ -1428,7 +1404,7 @@ components:
       maxItems: 10
       items:
         type: string
-        # todo: devrel why min/max length fails rendering?
+        # todo devrel: why min/max length fails rendering?
         #        minLength: 1
         #        maxLength: 15
       example:
@@ -1582,21 +1558,20 @@ components:
           description: provide details on sync status
           type: string
           example: Not found
-        # todo: implement dirty, data_modified and metadata_modified
-        dirty:
-          description: Indicates if the list content or metadata were modified since last sync.
-          type: boolean
-          example: true
-        data_modified:
-          description: One or more list items were added, removed and/or modified since latest sync.
-          type: boolean
-          example: true
         metadata_modified:
           description: List metadata (definition) is modified since latest sync.
           type: boolean
           example: false
+        data_modified:
+          description: One or more list items were added, removed and/or modified since latest sync.
+          type: boolean
+          example: true
+        dirty:
+          description: Indicates if the list content or metadata were modified since last sync.
+          type: boolean
+          example: true
 
-    # todo: root list type is removed - use the datasource type
+    # todo:: breaking change: root list type is removed - use the datasource type
     ListSystemFields:
       description: Fields that are added to a list by the system
       type: object
@@ -1624,8 +1599,6 @@ components:
           type: object
           additionalProperties: true
           minProperties: 1
-          # todo: how many attributes we should support
-          # maxProperties: 20
           example:
             firstName: Adrianna
             lastName: Campbell
@@ -1641,8 +1614,7 @@ components:
         list_id:
           $ref: "#/components/schemas/ListId"
 
-    # todo: rename ListItemDTO
-    ItemDto:
+    ListItemDto:
       description: Item resource
       allOf:
         - $ref: "#/components/schemas/BulkBase"
@@ -1666,27 +1638,20 @@ components:
       maxLength: 50
       example: from_number
 
-    # todo rename from ActionParameterDefinition
-    ActionParameter:
-      type: object
-      properties:
-        name:
-          $ref: "#/components/schemas/ActionParameterName"
-        description:
-          type: string
-          # todo: should we use same name and description length for action parameter (then can yse the ResourceNameAndDescription schema)
-          maxLength: 256
-        type:
-          $ref: "#/components/schemas/ActionParameterTypeEnum"
-        default:
-          type: string
-          example: 5552036475
-        required:
-          type: boolean
-          default: true
-          example: true
-      required:
-        - name
+    ActionParameterDto:
+      allOf:
+        - $ref: "#/components/schemas/ResourceNameAndDescription"
+        - type: object
+          properties:
+            type:
+              $ref: "#/components/schemas/ActionParameterTypeEnum"
+            default:
+              type: string
+              example: 5552036475
+            required:
+              type: boolean
+              default: true
+              example: true
 
     # todo rename from ActionHttpAsyncStatusValues
     HttpApiInvokeResponseStatus:
@@ -1714,7 +1679,7 @@ components:
               example: "{{ event.error.details }}"
       required:
         - details
-      # todo: devrel how to override the error example
+      # todo devrel: how to override the error example
       example:
         values:
           - "404"
@@ -1741,6 +1706,7 @@ components:
                     type: string
                   default:
                     - "200"
+                    - "201"
                     - "202"
                     - "204"
                   example:
@@ -1749,7 +1715,7 @@ components:
           $ref: "#/components/schemas/HttpApiInvokeResponseStatus"
         error:
           $ref: "#/components/schemas/HttpApiInvokeResponseErrorStatus"
-        unmapped_value:
+        unmapped_values_status:
           type: string
           enum:
             - success
@@ -1772,7 +1738,6 @@ components:
         - name
         - value
 
-    # todo rename from ActionCommandDto
     ActionCommandTypeEnum:
       type: string
       enum:
@@ -1849,9 +1814,9 @@ components:
             parameters:
               type: array
               items:
-                $ref: "#/components/schemas/ActionParameter"
+                $ref: "#/components/schemas/ActionParameterDto"
             command:
-              # todo: devrel - how to list the command attributes
+              # todo devrel: - how to list the command attributes
               discriminator:
                 propertyName: type
               oneOf:
@@ -1962,7 +1927,6 @@ components:
         - correlation_id
 
     Rule:
-      # todo: is rule the right name? maybe matcher as it's used in event_handler matcher field
       allOf:
         - $ref: "#/components/schemas/ResourceNameAndDescription"
         - type: object
@@ -1981,7 +1945,7 @@ components:
     Segmentation:
       allOf:
         - $ref: "#/components/schemas/Rule"
-        # todo: remove template from segmentation
+        # todo: breaking change: remove template from segmentation
 
     EventMatcher:
       allOf:
@@ -2026,8 +1990,7 @@ components:
       discriminator:
         propertyName: type
 
-    # todo: rename from JobSegmentationDefinitionDto
-    JobSegmentation:
+    SegmentationJobDto:
       allOf:
         - $ref: "#/components/schemas/JobDefinitionBase"
         - type: object
@@ -2061,7 +2024,7 @@ components:
               discriminator:
                 propertyName: type
               oneOf:
-                - $ref: "#/components/schemas/JobSegmentation"
+                - $ref: "#/components/schemas/SegmentationJobDto"
 
     JobDto:
       allOf:
@@ -2078,15 +2041,18 @@ components:
               $ref: "#/components/schemas/Tags"
             job_id:
               $ref: "#/components/schemas/JobId"
-            # todo: should we group the schedule part into a dedicated object?
-            start_at:
-              type: string
-              format: date-time
-              example: "2022-06-06T05:46:00.936Z"
-            end_at:
-              type: string
-              format: date-time
-              example: "2022-06-20T05:46:00.936Z"
+            # todo: group the schedule attributes
+            schedule:
+              type: object
+              properties:
+                start_at:
+                  type: string
+                  format: date-time
+                  example: "2022-06-06T05:46:00.936Z"
+                end_at:
+                  type: string
+                  format: date-time
+                  example: "2022-06-20T05:46:00.936Z"
       required:
         - job_id
         - start_at
@@ -2294,8 +2260,7 @@ components:
         - value
         - statistics
 
-    # todo: rename from StatsRunSummaryDto
-    RunSummary:
+    RunSummaryDto:
       type: object
       properties:
         run_id:
