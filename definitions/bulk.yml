@@ -1665,8 +1665,6 @@ components:
           maxItems: 10
           example:
             - "202"
-      required:
-        - values
 
     # todo: rename from ActionHttpAsyncErrorStatus
     HttpApiInvokeResponseErrorStatus:
@@ -1685,7 +1683,7 @@ components:
           - "404"
 
     # todo: rename from ActionHttpAsync
-    HttpApiInvokeResponse:
+    HttpResponseDetails:
       type: object
       properties:
         invocation_id:
@@ -1693,8 +1691,8 @@ components:
         value:
           description: expression used to extract the status value from the response for example in a sync response, this would be the {{response.statusCode}} or a payload attribute {{response.payload.status}} or an async event details {{event.status}}
           type: string
-          default: "{{response.statusCode}}"
-          example: "{{response.statusCode}}"
+          default: "{{ response.statusCode }}"
+          example: "{{ response.statusCode }}"
         success:
           oneOf:
             - $ref: "#/components/schemas/HttpApiInvokeResponseStatus"
@@ -1771,6 +1769,8 @@ components:
               example: http-api-invoke
             url:
               type: string
+              format: uri
+              maxLength: 2048
               example: https://api.nexmo.com/v1/messages
             method:
               type: string
@@ -1799,9 +1799,9 @@ components:
               properties:
                 # todo: set example for sync
                 sync:
-                  $ref: "#/components/schemas/HttpApiInvokeResponse"
+                  $ref: "#/components/schemas/HttpResponseDetails"
                 async:
-                  $ref: "#/components/schemas/HttpApiInvokeResponse"
+                  $ref: "#/components/schemas/HttpResponseDetails"
           required:
             - url
 
