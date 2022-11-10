@@ -147,7 +147,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ListTemplatesResponse"
 
-  /templates/:template_id:
+  /templates/{template_id}:
     get:
       operationId: getTemplate
       summary: Get an existing template by ID
@@ -190,7 +190,7 @@ paths:
         "202":
           description: No Content
 
-  /templates/:template_id/channel:
+  /templates/{template_id}/channel:
     post:
       operationId: createChannel
       summary: Create a new Channel on a template
@@ -208,7 +208,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ListTemplatesResponse"
 
-  /templates/:template_id/:channel:
+  /templates/{template_id}/{channel}:
     delete:
       operationId: deleteChannel
       summary: Delete a channel on a template
@@ -221,7 +221,7 @@ paths:
         "202":
           description: No content
 
-  /templates/:template_id/channels/:channel/:locale:
+  /templates/{template_id}/channels/{channel}/{locale}:
     post:
       operationId: updateLocale
       summary: Update the locale information on a channel
@@ -239,7 +239,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/ListTemplatesResponse"
 
-  /verify/v2/templates/:template_id/channels/:channel/:locale:
+  /verify/v2/templates/{template_id}/channels/{channel}/{locale}:
     delete:
       operationId: deleteLocale
       summary: Delete a locale on a channel
