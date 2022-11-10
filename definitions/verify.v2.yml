@@ -340,7 +340,7 @@ components:
             #       - $ref: '#/components/schemas/NewPSD2Request'
   parameters:
     template_id:
-      name: template_uuid
+      name: template_id
       required: true
       in: path
       description: The template UUID
@@ -932,14 +932,14 @@ components:
     ListTemplatesResponse:
           type: object
           properties:
-            template_uuid:
+            template_id:
               type: string
             name:
               type: string
             channels:
               type: object
               example: {
-                "template_uuid": "8f35a1a7-eb2f-4552-8fdf-fffdaee41bc9",
+                "template_id": "8f35a1a7-eb2f-4552-8fdf-fffdaee41bc9",
                 "name": "Template1",
                 "channels": {
                   "sms": {
