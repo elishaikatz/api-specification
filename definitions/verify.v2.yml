@@ -159,6 +159,7 @@ x-webhooks:
             application/json:
               schema:
                 $ref: '#/components/schemas/VerifyResource'
+
   events:
     '{$request.body#/callback}':
       post:
@@ -172,6 +173,20 @@ x-webhooks:
             application/json:
               schema:
                 $ref: '#/components/schemas/VerifyResourceWhatsappInteractive'
+
+  silent-auth-callback:
+    '{$request.body#/callback}':
+      post:
+        summary: Silent Auth Request Update
+        operationId: silent-auth-update
+        x-example-path: '/webhooks/request-status-update'
+        description: An inbound request update for a silent authentication workflow.
+        requestBody:
+          required: true
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/VerifySilentAuth'
 
 components:
   requestBodies:
@@ -251,6 +266,7 @@ components:
         - $ref: '#/components/schemas/NewCodeRequestWorkflowWhatsAppInteractive'
         - $ref: '#/components/schemas/NewCodeRequestWorkflowVoice'
         - $ref: '#/components/schemas/NewCodeRequestWorkflowEmail'
+        - $ref: '#/components/schemas/NewCodeRequestWorkflowSilentAuth'
 
     NewCodeRequestWorkflowSMS:
       title: SMS
@@ -431,6 +447,39 @@ components:
           required:
             - workflow
 
+    NewCodeRequestWorkflowSilentAuth:
+      title: Silent Auth
+      x-tab-id: WorkflowSilentAuth
+      allOf:
+        - type: object
+          description: Request a code be sent to a user
+          properties:
+            workflow:
+              type: array
+              items:
+                type: object
+                properties:
+                  channel:
+                    type: string
+                    description: "The channel"
+                    enum:
+                      - silent_auth
+                    example: silent_auth
+                  to:
+                    $ref: '#/components/schemas/ToSilentAuth'
+                required:
+                  - channel
+                  - to
+              example: [
+                {
+                  "channel": "silent_auth",
+                  "to": "447700900000"
+                }
+              ]
+          required:
+            - workflow
+            - brand
+
     NewPSD2Request:
       allOf:
         - $ref: '#/components/schemas/NewRequestBase'
@@ -487,6 +536,13 @@ components:
       example: '447700900000'
       description: The phone number to contact, in the [E.164](https://en.wikipedia.org/wiki/E.164) format. Don't use a leading + or 00 when entering a phone number, start with the country code, for example, 447700900000.
 
+    ToSilentAuth:
+      type: string
+      minLength: 1
+      maxLength: 50
+      example: '447700900000'
+      description: The phone number to use for authentication, in the [E.164](https://en.wikipedia.org/wiki/E.164) format. Don't use a leading + or 00 when entering a phone number, start with the country code, for example, 447700900000.
+
     From:
       type: string
       minLength: 1
@@ -534,6 +590,17 @@ components:
       type: string
       description: 'The ID of the request'
       example: 'c11236f4-00bf-4b89-84ba-88b25df97315'
+
+    TriggeredAt:
+      type: string
+      description: >-
+        The date and time the verification request was triggered, in ISO 8601 format.
+      example: "2020-01-01T14:00:00.000Z"
+
+    Type:
+      type: string
+      description: Type of response
+      example: "event"
 
     VerifyResource:
       required:
@@ -654,6 +721,54 @@ components:
         #         description: The date and time that the event was started, in ISO 8601 format.
         #         example: "2020-01-01T14:00:00.000Z"
 
+    VerifySilentAuth:
+      required:
+        - request_id
+        - triggered_at
+        - type
+        - channel
+        - status
+      properties:
+        request_id:
+          $ref: '#/components/schemas/RequestId'
+        triggered_at:
+          $ref: '#/components/schemas/TriggeredAt'
+        type:
+          $ref: '#/components/schemas/Type'
+        channel:
+          type: string
+          enum:
+            - silent_auth
+        status:
+          type: string
+          description: Current status of this request
+          example: action_pending
+          enum:
+            - action_pending
+            - failed
+            - completed
+            - user_rejected
+        action:
+          type: array
+          items:
+            type: object
+            properties:
+              type:
+                type: string
+                description: "Description of workflow event"
+                enum:
+                  - check
+              check_url:
+                type: string
+                description: URL for Silent Auth Verify workflow completion
+                example: https://eu.api.silent.auth/phone_check/v0.1/checks/<id>/redirect
+          example: [
+            {
+              "type": "check",
+              "check_url": "https://eu.api.silent.auth/phone_check/v0.1/checks/<id>/redirect"
+            },
+          ]
+
     VerifyResourceWhatsappInteractive:
       required:
         - request_id
@@ -667,14 +782,9 @@ components:
         request_id:
           $ref: '#/components/schemas/RequestId'
         triggered_at:
-          type: string
-          description: >-
-            The date and time the verification request was triggered, in ISO 8601 format.
-          example: "2020-01-01T14:00:00.000Z"
+          $ref: '#/components/schemas/TriggeredAt'
         type:
-          type: string
-          description: Type of response
-          example: "event"
+          $ref: '#/components/schemas/Type'
         channel: 
           type: string
           description: The channel
