@@ -24,6 +24,10 @@ paths:
                     type: integer
                     example: 10
                     description: The number of results returned on this page.
+                  total_items:
+                    type: integer
+                    example: 30
+                    description: The overall number of available rooms.
                   _embedded:
                     type: object
                     properties:
